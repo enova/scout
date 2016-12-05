@@ -70,27 +70,27 @@ func (q *queue) Poll() {
 	}
 
 	for _, msg := range messages {
-		log.Info("Processing message: ", msg.MessageID)
-		deletable := q.EnqueueMessage(msg)
+		ctx := log.WithField("MessageID", msg.MessageID)
+		ctx.Info("Processing message")
+		deletable := q.enqueueMessage(msg, ctx)
 		if deletable {
-			q.DeleteMessage(msg)
+			q.deleteMessage(msg, ctx)
 		}
 	}
 }
 
-// DeleteMessage deletes a single message from SQS
-func (q *queue) DeleteMessage(msg Message) {
+// deleteMessage deletes a single message from SQS
+func (q *queue) deleteMessage(msg Message, ctx log.FieldLogger) {
 	err := q.SQSClient.Delete(msg)
 	if err != nil {
-		log.Error("Couldn't delete message: ", msg.MessageID)
+		ctx.Error("Couldn't delete message: ", err.Error())
 	} else {
-		log.Info("Deleted message: ", msg.MessageID)
+		ctx.Info("Deleted message")
 	}
 }
 
-// EnqueueMessage pushes a single message from SQS into redis
-func (q *queue) EnqueueMessage(msg Message) bool {
-	ctx := log.WithField("MessageID", msg.MessageID)
+// enqueueMessage pushes a single message from SQS into redis
+func (q *queue) enqueueMessage(msg Message, ctx log.FieldLogger) bool {
 	body := make(map[string]string)
 	err := json.Unmarshal([]byte(msg.Body), &body)
 	if err != nil {
@@ -106,7 +106,7 @@ func (q *queue) EnqueueMessage(msg Message) bool {
 
 	jid, err := q.WorkerClient.Push(workerClass, body["Message"])
 	if err != nil {
-		ctx.Error("Couldn't enqueue worker: ", workerClass)
+		ctx.WithField("Class", workerClass).Error("Couldn't enqueue worker: ", err.Error())
 		return false
 	}
 
