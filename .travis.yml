@@ -1,0 +1,20 @@
+language: go
+
+go:
+  - 1.6
+  - 1.7
+  - tip
+
+before_script:
+  - go get github.com/GeertJohan/fgt
+  - go get github.com/golang/lint
+
+script:
+  - fgt gomft -l .
+  - fgt golint ./..
+  - go vet ./...
+  - go test -v ./...
+
+matrix:
+  allow_failures:
+    - go: tip
