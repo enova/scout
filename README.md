@@ -1,4 +1,5 @@
 # Scout
+[![Build Status](https://travis-ci.org/enova/scout.svg?branch=master)](https://travis-ci.org/enova/scout)
 
 Scout is a daemon for listening to a set of SNS topics and enqueuing anything it
 finds into sidekiq jobs. It's meant to extract processing of SQS from the rails

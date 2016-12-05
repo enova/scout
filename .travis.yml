@@ -6,12 +6,11 @@ go:
   - tip
 
 before_script:
-  - go get github.com/GeertJohan/fgt
   - go get github.com/golang/lint
 
 script:
-  - fgt gomft -l .
-  - fgt golint ./..
+  - test -z $(gomft -l .)
+  - test -z $(golint ./...)
   - go vet ./...
   - go test -v ./...
 
