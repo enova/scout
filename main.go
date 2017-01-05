@@ -24,7 +24,7 @@ func init() {
 Poll SQS queues specified in a config and enqueue Sidekiq jobs with the queue items.
 It gracefully stops when sent SIGTERM.`
 
-	app.Version = "1.3"
+	app.Version = "2.0"
 
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
@@ -34,7 +34,7 @@ It gracefully stops when sent SIGTERM.`
 		cli.Int64Flag{
 			Name:  "freq, f",
 			Value: 100,
-			Usage: "Poll SQS every `N` milliseconds",
+			Usage: "Poll SQS a max of every `N` milliseconds",
 		},
 		cli.StringFlag{
 			Name:  "log-level, l",
@@ -58,7 +58,6 @@ func main() {
 
 func runApp(ctx *cli.Context) error {
 	configFile := ctx.String("config")
-	frequency := ctx.Int64("freq")
 
 	if ctx.Bool("json") {
 		log.SetFormatter(&log.JSONFormatter{})
@@ -81,7 +80,6 @@ func runApp(ctx *cli.Context) error {
 	}
 
 	log.Infof("Reading config from %s", configFile)
-	log.Infof("Polling every %d milliseconds", frequency)
 
 	config, err := ReadConfig(configFile)
 	if err != nil {
@@ -98,22 +96,33 @@ func runApp(ctx *cli.Context) error {
 		log.Infof("%s -> %s", topic, worker)
 	}
 
-	Listen(queue, time.Tick(time.Duration(frequency)*time.Millisecond))
+	Listen(queue, time.Duration(ctx.Int64("freq"))*time.Millisecond)
 	return nil
 }
 
 // Listen does the work. It only returns if we get a signal
-func Listen(queue Queue, freq <-chan time.Time) {
+func Listen(queue Queue, freq time.Duration) {
+	messages := make(chan *Message, 10)
+
+	go pollForever(queue, messages, freq)
+
 	for {
 		select {
 		case <-signals:
 			log.Info("Got TERM")
 			queue.Semaphore().Wait()
 			return
-		case tick := <-freq:
-			log.Debug("Polling at: ", tick)
+		case msg := <-messages:
 			queue.Semaphore().Add(1)
-			go queue.Poll()
+			go queue.ProcessMessage(msg)
 		}
+	}
+}
+
+func pollForever(queue Queue, messages chan *Message, freq time.Duration) {
+	for {
+		throttle := time.After(freq)
+		queue.Poll(messages)
+		<-throttle
 	}
 }
