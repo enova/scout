@@ -6,10 +6,10 @@ go:
   - tip
 
 before_script:
-  - go get github.com/golang/lint
+  - go get github.com/golang/lint/golint
 
 script:
-  - test -z $(gomft -l .)
+  - test -z $(gofmt -l .)
   - test -z $(golint ./...)
   - go vet ./...
   - go test -v ./...
