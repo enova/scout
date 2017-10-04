@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strings"
 	"sync"
+	"time"
 
 	log "github.com/Sirupsen/logrus"
 )
@@ -12,13 +13,17 @@ import (
 // Queue is an encasulation for processing an SQS queue and enqueueing the
 // results in sidekiq
 type Queue interface {
-	// Poll gets the next batch of messages from SQS and processes them.
-	// When it's finished, it downs the sempahore
-	Poll()
+	// Poll gets the next batch of messages from SQS and enqueues them in
+	// the out channel
+	Poll(out chan *Message)
 
 	// Semaphore returns the lock used to ensure that all the work is
 	// done before terminating the queue
 	Semaphore() *sync.WaitGroup
+
+	// ProcessMessage takes a single message, enqueues it in redis, and then
+	// deletes it out of SQS. It downs the Semaphore on exit.
+	ProcessMessage(msg *Message)
 }
 
 // queue is the actual implementation
@@ -59,28 +64,33 @@ func (q *queue) Semaphore() *sync.WaitGroup {
 	return q.Sem
 }
 
-func (q *queue) Poll() {
-	if q.Sem != nil {
-		defer q.Sem.Done()
-	}
-
+func (q *queue) Poll(out chan *Message) {
+	log.Debug("Polling at: ", time.Now())
 	messages, err := q.SQSClient.Fetch()
 	if err != nil {
 		log.Error("Error fetching messages: ", err.Error())
 	}
 
 	for _, msg := range messages {
-		ctx := log.WithField("MessageID", msg.MessageID)
-		ctx.Info("Processing message")
-		deletable := q.enqueueMessage(msg, ctx)
-		if deletable {
-			q.deleteMessage(msg, ctx)
-		}
+		out <- msg
+	}
+}
+
+func (q *queue) ProcessMessage(msg *Message) {
+	if q.Sem != nil {
+		defer q.Sem.Done()
+	}
+
+	ctx := log.WithField("MessageID", msg.MessageID)
+	ctx.Info("Processing message")
+	deletable := q.enqueueMessage(msg, ctx)
+	if deletable {
+		q.deleteMessage(msg, ctx)
 	}
 }
 
 // deleteMessage deletes a single message from SQS
-func (q *queue) deleteMessage(msg Message, ctx log.FieldLogger) {
+func (q *queue) deleteMessage(msg *Message, ctx log.FieldLogger) {
 	err := q.SQSClient.Delete(msg)
 	if err != nil {
 		ctx.Error("Couldn't delete message: ", err.Error())
@@ -90,7 +100,7 @@ func (q *queue) deleteMessage(msg Message, ctx log.FieldLogger) {
 }
 
 // enqueueMessage pushes a single message from SQS into redis
-func (q *queue) enqueueMessage(msg Message, ctx log.FieldLogger) bool {
+func (q *queue) enqueueMessage(msg *Message, ctx log.FieldLogger) bool {
 	body := make(map[string]string)
 	err := json.Unmarshal([]byte(msg.Body), &body)
 	if err != nil {

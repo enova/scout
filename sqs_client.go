@@ -12,10 +12,10 @@ import (
 // SQSClient is an interface for SQS
 type SQSClient interface {
 	// Fetch returns the next batch of SQS messages
-	Fetch() ([]Message, error)
+	Fetch() ([]*Message, error)
 
 	// Delete deletes a single message from SQS
-	Delete(Message) error
+	Delete(*Message) error
 }
 
 // Message is the internal representation of an SQS message
@@ -50,19 +50,20 @@ func NewAWSSQSClient(conf AWSConfig, queueName string) (SQSClient, error) {
 	return client, nil
 }
 
-func (s *sdkClient) Fetch() ([]Message, error) {
+func (s *sdkClient) Fetch() ([]*Message, error) {
 	res, err := s.service.ReceiveMessage(&sqs.ReceiveMessageInput{
 		QueueUrl:            &s.url,
 		MaxNumberOfMessages: aws.Int64(10),
+		WaitTimeSeconds:     aws.Int64(20),
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	msgs := make([]Message, len(res.Messages))
+	msgs := make([]*Message, len(res.Messages))
 
 	for i, m := range res.Messages {
-		msgs[i] = Message{
+		msgs[i] = &Message{
 			MessageID:     *m.MessageId,
 			Body:          *m.Body,
 			ReceiptHandle: *m.ReceiptHandle,
@@ -72,7 +73,7 @@ func (s *sdkClient) Fetch() ([]Message, error) {
 	return msgs, nil
 }
 
-func (s *sdkClient) Delete(message Message) error {
+func (s *sdkClient) Delete(message *Message) error {
 	_, err := s.service.DeleteMessage(&sqs.DeleteMessageInput{
 		QueueUrl:      &s.url,
 		ReceiptHandle: &message.ReceiptHandle,

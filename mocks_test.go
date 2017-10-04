@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 )
 
-func MockMessage(body, topic string) Message {
+func MockMessage(body, topic string) *Message {
 	msg := map[string]string{
 		"Message":  body,
 		"TopicArn": topic,
@@ -15,17 +15,17 @@ func MockMessage(body, topic string) Message {
 		panic(err)
 	}
 
-	return Message{Body: string(data)}
+	return &Message{Body: string(data)}
 }
 
 type MockSQSClient struct {
-	Fetchable   []Message
+	Fetchable   []*Message
 	FetchError  error
-	Deleted     []Message
+	Deleted     []*Message
 	DeleteError error
 }
 
-func (m *MockSQSClient) Fetch() ([]Message, error) {
+func (m *MockSQSClient) Fetch() ([]*Message, error) {
 	if m.FetchError != nil {
 		return nil, m.FetchError
 	}
@@ -33,7 +33,7 @@ func (m *MockSQSClient) Fetch() ([]Message, error) {
 	return m.Fetchable, nil
 }
 
-func (m *MockSQSClient) Delete(message Message) error {
+func (m *MockSQSClient) Delete(message *Message) error {
 	m.Deleted = append(m.Deleted, message)
 	return m.DeleteError
 }

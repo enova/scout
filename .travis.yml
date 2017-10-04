@@ -5,7 +5,7 @@ go:
   - master
 
 before_script:
-  - go get github.com/golang/lint
+  - go get github.com/golang/lint/golint
 
 script:
   - test -z $(gofmt -l .)
