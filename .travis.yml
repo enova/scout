@@ -8,11 +8,11 @@ go:
   - master
 
 before_script:
-  - go get -u github.com/golang/lint
+  - go get -u github.com/golang/lint/...
 
 script:
   - test -z $(gofmt -l .)
-  - test -z $(golint ./...)
+  - golint -set_exit_status ./...
   - go vet ./...
   - go test -v ./...
 
