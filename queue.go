@@ -91,26 +91,39 @@ func (q *queue) deleteMessage(msg Message, ctx log.FieldLogger) {
 
 // enqueueMessage pushes a single message from SQS into redis
 func (q *queue) enqueueMessage(msg Message, ctx log.FieldLogger) bool {
-	body := make(map[string]string)
+	body := make(map[string]json.RawMessage)
 	err := json.Unmarshal([]byte(msg.Body), &body)
 	if err != nil {
 		ctx.Warn("Message body could not be parsed: ", err.Error())
 		return true
 	}
 
-	workerClass, ok := q.Topics[topicName(body["TopicArn"])]
-	if !ok {
-		ctx.Warn("No worker for topic: ", topicName(body["TopicArn"]))
+	var topicARN string
+	err = json.Unmarshal(body["TopicArn"], &topicARN)
+	if err != nil {
+		ctx.Warn("Topic ARN could not be parsed: ", err.Error())
 		return true
 	}
 
-	jid, err := q.WorkerClient.Push(workerClass, body["Message"])
+	workerClass, ok := q.Topics[topicName(topicARN)]
+	if !ok {
+		ctx.Warn("No worker for topic: ", topicName(topicARN))
+		return true
+	}
+
+	var bodyMessage string
+	err = json.Unmarshal(body["Message"], &bodyMessage)
+	if err != nil {
+		ctx.Warn("'Message' field could not be parsed: ", err.Error())
+	}
+
+	jid, err := q.WorkerClient.Push(workerClass, bodyMessage)
 	if err != nil {
 		ctx.WithField("Class", workerClass).Error("Couldn't enqueue worker: ", err.Error())
 		return false
 	}
 
-	ctx.WithField("Args", body["Message"]).Info("Enqueued job: ", jid)
+	ctx.WithField("Args", bodyMessage).Info("Enqueued job: ", jid)
 	return true
 }
 

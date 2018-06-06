@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"sync"
 	"testing"
@@ -131,6 +132,37 @@ func (q *QueueTestSuite) TestQueue_UnparseableBody() {
 	q.assert.Contains(q.sqsClient.Deleted, message1)
 	q.assert.Contains(q.sqsClient.Deleted, message2)
 	q.assert.Contains(q.sqsClient.Deleted, badMessage)
+}
+
+func (q *QueueTestSuite) TestQueue_ComplexBody() {
+	// make a message with a body that cannot be represented as map[string]string
+	msg := map[string]interface{}{
+		"Message":  `{"foo":"bar"}`,
+		"TopicArn": "topicA",
+		"Some":     map[string]string{"other": "data"},
+	}
+
+	data, err := json.Marshal(msg)
+	if err != nil {
+		panic(err)
+	}
+
+	message := Message{Body: string(data)}
+
+	// set the mock to return that message
+	q.sqsClient.Fetchable = []Message{message}
+
+	// make a some topics
+	q.queue.Topics["topicA"] = "WorkerA"
+
+	// do the work
+	q.queue.Poll()
+
+	// The worker should be enqueued
+	q.assert.Contains(q.workerClient.Enqueued, []string{"WorkerA", `{"foo":"bar"}`})
+
+	// The message should be deleted
+	q.assert.Contains(q.sqsClient.Deleted, message)
 }
 
 func (q *QueueTestSuite) TestQueue_EnqueueError() {
