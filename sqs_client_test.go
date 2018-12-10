@@ -12,7 +12,7 @@ import (
 // These tests are hardcoded to point to actual sqs queues and sns topics.
 // You should think of them as "integration" tests, and in general you don't
 // want to be running these all the time. You will need to provide your own
-// credentials below to run these.
+// credentials and queue below to run these.
 
 var config = AWSConfig{
 	AccessKey: "",
@@ -43,11 +43,11 @@ func TestSQS_Init(t *testing.T) {
 	// wrong region
 	_, err = NewAWSSQSClient(
 		AWSConfig{
-			AccessKey: "AKIAJNRPNGF7HIWQ5C6Q",
-			SecretKey: "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",
+			AccessKey: config.AccessKey,
+			SecretKey: config.SecretKey,
 			Region:    "us.best",
 		},
-		"test-queue-integration",
+		queueName,
 	)
 	require.Error(t, err)
 
@@ -56,18 +56,18 @@ func TestSQS_Init(t *testing.T) {
 		AWSConfig{
 			AccessKey: "super",
 			SecretKey: "secret",
-			Region:    "us.west.2",
+			Region:    config.Region,
 		},
-		"test-queue-integration",
+		queueName,
 	)
 	require.Error(t, err)
 
 	// wrong queue
 	_, err = NewAWSSQSClient(
 		AWSConfig{
-			AccessKey: "AKIAJNRPNGF7HIWQ5C6Q",
-			SecretKey: "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",
-			Region:    "us.west.2",
+			AccessKey: config.AccessKey,
+			SecretKey: config.SecretKey,
+			Region:    config.Region,
 		},
 		"fake-queue", // hopefully nobody ever makes this
 	)
