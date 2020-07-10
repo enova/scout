@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 // Queue is an encasulation for processing an SQS queue and enqueueing the
