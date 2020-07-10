@@ -1,0 +1,8 @@
+version: '3.8'
+services:
+  scout:
+    container_name: scout.enova.dev
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ./scout --config=scout.yml
