@@ -62,6 +62,8 @@ func (q *queue) Semaphore() *sync.WaitGroup {
 func (q *queue) Poll() {
 	if q.Sem != nil {
 		defer q.Sem.Done()
+	} else {
+		log.Info("Polling inside Poll function")
 	}
 
 	messages, err := q.SQSClient.Fetch()
