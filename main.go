@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/facebookgo/grace/gracehttp"
+	"github.com/gorilla/mux"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -12,8 +15,10 @@ import (
 )
 
 var (
-	app     *cli.App
-	signals chan os.Signal
+	app           *cli.App
+	signals       chan os.Signal
+	daemonContext *context
+	router        *mux.Router
 )
 
 func init() {
@@ -24,7 +29,7 @@ func init() {
 Poll SQS queues specified in a config and enqueue Sidekiq jobs with the queue items.
 It gracefully stops when sent SIGTERM.`
 
-	app.Version = "1.4"
+	app.Version = "1.5"
 
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
@@ -88,6 +93,8 @@ func runApp(ctx *cli.Context) error {
 		return cli.NewExitError("Failed to parse config file", 1)
 	}
 
+	fmt.Printf("Config is: %v\n", config)
+
 	queue, err := NewQueue(config)
 	if err != nil {
 		return cli.NewExitError(fmt.Sprintf("Initialization error: %s", err.Error()), 1)
@@ -96,6 +103,18 @@ func runApp(ctx *cli.Context) error {
 	log.Info("Now listening on queue: ", config.Queue.Name)
 	for topic, worker := range config.Queue.Topics {
 		log.Infof("%s -> %s", topic, worker)
+	}
+
+	router = newRouter()
+	setContext()
+	err = daemonContext.writePIDFile()
+	if err != nil {
+		log.Infof(err.Error())
+		return err
+	}
+
+	if err := setupStatusHandler(); err != nil {
+		log.Fatal(err)
 	}
 
 	Listen(queue, time.Tick(time.Duration(frequency)*time.Millisecond))
@@ -109,6 +128,7 @@ func Listen(queue Queue, freq <-chan time.Time) {
 		case <-signals:
 			log.Info("Got TERM")
 			queue.Semaphore().Wait()
+			daemonContext.removePIDFile()
 			return
 		case tick := <-freq:
 			log.Debug("Polling at: ", tick)
@@ -116,4 +136,11 @@ func Listen(queue Queue, freq <-chan time.Time) {
 			go queue.Poll()
 		}
 	}
+}
+
+func setupStatusHandler() error {
+	return gracehttp.Serve(&http.Server{
+		Addr:    ":9000",
+		Handler: router,
+	})
 }

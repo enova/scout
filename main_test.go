@@ -77,8 +77,11 @@ func (w *WaitQueue) Poll() {
 // waitListen just calls listen and then sends `3 on the sequence channel when
 // the call exits
 func waitListen(q Queue, freq <-chan time.Time, seq chan int) {
+	setContext()
+	daemonContext.writePIDFile()
 	Listen(q, freq)
 	seq <- 3
+	daemonContext.removePIDFile()
 }
 
 // This test is pretty complicated because I'm basically using it to ensure that
@@ -99,6 +102,9 @@ func TestSignals(t *testing.T) {
 		seq:  seq,
 		wait: wait,
 	}
+
+	setContext()
+	daemonContext.writePIDFile()
 
 	// begin listening
 	go waitListen(queue, freq, seq)
@@ -123,4 +129,6 @@ func TestSignals(t *testing.T) {
 	// then Listen() should exit
 	val = <-seq
 	require.Equal(t, val, 3)
+
+	daemonContext.removePIDFile()
 }
