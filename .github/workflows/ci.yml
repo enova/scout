@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.15.4'
+      - run: |
+          go get -u golang.org/x/lint/golint
+          test -z $(gofmt -l .)
+          golint -set_exit_status ./...
+          go vet ./...
+          go test -v ./...
