@@ -47,6 +47,10 @@ func (q *QueueTestSuite) SetupTest() {
 	q.queue.Topics = make(map[string]string)
 }
 
+func (q *QueueTestSuite) TestQueue_Broken() {
+	q.assert.Equal(true, false, "this should fail")
+}
+
 func (q *QueueTestSuite) TestQueue_Success() {
 	// make some messages
 	message1 := MockMessage(`{"foo":"bar"}`, "topicA")
