@@ -1,5 +1,5 @@
 # Scout
-[![Build Status](https://travis-ci.org/enova/scout.svg?branch=master)](https://travis-ci.org/enova/scout)
+![ci-status](https://github.com/enova/scout/workflows/CI/badge.svg)
 
 Scout is a daemon for listening to a set of SNS topics and enqueuing anything it
 finds into sidekiq jobs. It's meant to extract processing of SQS from the rails
@@ -17,7 +17,7 @@ USAGE:
    scout [global options] command [command options] [arguments...]
 
 VERSION:
-   1.3
+   v1.5.0
 
 COMMANDS:
      help, h  Shows a list of commands or help for one command
@@ -59,15 +59,18 @@ strucure of the file, so if you copy paste it you'll probably be disappointed.
 
 ## Versioning
 
-Scout uses tagged commits to be compatible with gopkg.in. To pin to version 1,
-you can import it as `gopkg.in/enova/scout.v1`. The "first" version is version
-1.3, since all other versions were before this project was made open source.
-Version 2 is possible at some point and may contain breaking changes, so pinning
-to version 1 is recommended unless you want to work with the bleeding edge.
+Scout uses tagged commits that are compatible with go modules. The first module
+aware version of scout is version `v1.5.0`. We recommend that you also use go
+modules to guard against unexpected updates.
+
+For legacy systems not using go modules, you can import using gopkg.in to pin
+to version 1. The import path is `gopkg.in/enova/scout.v1`.
 
 ## Development
 
-To get set up make sure to run `go get -t -u ./...` to get all the dependencies.
+Scout uses go modules to manage it's dependencies, so you should clone it to a
+location outside your `GOPATH`. At that point all the standard toolchain commands
+do what they say on the box.
 
 ### Testing
 
