@@ -24,7 +24,7 @@ func init() {
 Poll SQS queues specified in a config and enqueue Sidekiq jobs with the queue items.
 It gracefully stops when sent SIGTERM.`
 
-	app.Version = "1.4"
+	app.Version = "v1.5.0"
 
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
