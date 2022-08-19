@@ -20,6 +20,7 @@ type RedisConfig struct {
 	Host      string `yaml:"host"`
 	Namespace string `yaml:"namespace"`
 	Queue     string `yaml:"queue"`
+	Password  string `yaml:"password"`
 }
 
 // AWSConfig is a nested config that contains the necessary parameters to

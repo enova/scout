@@ -18,6 +18,7 @@ var config = RedisConfig{
 	Host:      "localhost:6379",
 	Namespace: "integration",
 	Queue:     "testq",
+	Password: "",
 }
 
 func TestWorker_Init(t *testing.T) {
@@ -53,6 +54,18 @@ func TestWorker_Init(t *testing.T) {
 		},
 	)
 	require.NoError(t, err)
+
+	// use auth, this doesn't error
+	_, err = NewRedisWorkerClient(
+		RedisConfig{
+			Host:      "localhost:6379",
+			Namespace: "",
+			Queue:     "testq",
+			Password: "1234",
+		},
+	)
+	require.NoError(t, err)
+
 }
 
 func TestWorker_Push(t *testing.T) {
