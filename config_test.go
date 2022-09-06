@@ -87,7 +87,6 @@ func (c *ConfigTestSuite) TestConfig_Sparse() {
 	c.assert.Equal(len(config.Queue.Topics), 0)
 }
 
-
 var redisAuthConfig = `
 redis:
   host: localhost:9000

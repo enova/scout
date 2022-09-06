@@ -43,8 +43,7 @@ redis:
   host: "localhost:9000"
   namespace: "test"
   queue: "background"
-  #
-  password: "someoptionalpassword"
+  password: "someoptionalpassword"  # optional key
 aws:
   access_key: "super"
   secret_key: "secret"
