@@ -1,3 +1,4 @@
+//go:build redisint
 // +build redisint
 
 package main
@@ -18,7 +19,7 @@ var config = RedisConfig{
 	Host:      "localhost:6379",
 	Namespace: "integration",
 	Queue:     "testq",
-	Password: "",
+	Password:  "",
 }
 
 func TestWorker_Init(t *testing.T) {
@@ -61,7 +62,7 @@ func TestWorker_Init(t *testing.T) {
 			Host:      "localhost:6379",
 			Namespace: "",
 			Queue:     "testq",
-			Password: "1234",
+			Password:  "1234",
 		},
 	)
 	require.NoError(t, err)

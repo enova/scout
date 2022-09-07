@@ -1,3 +1,4 @@
+//go:build sqsint
 // +build sqsint
 
 package main
