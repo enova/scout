@@ -1,3 +1,5 @@
+//go:build redisint
+
 package main
 
 import (
