@@ -1,4 +1,4 @@
-// +build redisint
+//go:build redisint
 
 package main
 

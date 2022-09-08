@@ -1,3 +1,4 @@
+// Package main is entry point for scout
 package main
 
 import (
