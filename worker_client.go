@@ -27,13 +27,19 @@ func NewRedisWorkerClient(redis RedisConfig) (WorkerClient, error) {
 		return nil, errors.New("Sidekiq queue required")
 	}
 
-	workers.Configure(map[string]string{
+	workerConfig := map[string]string{
 		"server":    redis.Host,
 		"database":  "0",
 		"pool":      "20",
 		"process":   "1",
 		"namespace": redis.Namespace,
-	})
+	}
+
+	if redis.Password != "" {
+		workerConfig["password"] = redis.Password
+	}
+
+	workers.Configure(workerConfig)
 
 	return &redisWorkerClient{queue: redis.Queue}, nil
 }

@@ -17,7 +17,7 @@ USAGE:
    scout [global options] command [command options] [arguments...]
 
 VERSION:
-   v1.5.0
+   v1.6.0
 
 COMMANDS:
      help, h  Shows a list of commands or help for one command
@@ -43,6 +43,7 @@ redis:
   host: "localhost:9000"
   namespace: "test"
   queue: "background"
+  password: "someoptionalpassword"  # optional key
 aws:
   access_key: "super"
   secret_key: "secret"

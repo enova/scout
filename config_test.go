@@ -62,6 +62,7 @@ func (c *ConfigTestSuite) TestConfig_Valid() {
 	// More to convince myself that the yaml package works than anything
 	c.assert.Equal(config.Redis.Host, "localhost:9000")
 	c.assert.Equal(config.Redis.Queue, "background")
+	c.assert.Equal(config.Redis.Password, "")
 	c.assert.Equal(config.AWS.Region, "us_best")
 	c.assert.Equal(config.Queue.Name, "myapp_queue")
 	c.assert.Equal(config.Queue.Topics["foo_topic"], "FooWorker")
@@ -84,4 +85,20 @@ func (c *ConfigTestSuite) TestConfig_Sparse() {
 	c.assert.Equal(config.Redis.Namespace, "")
 	c.assert.Equal(config.AWS.Region, "us_best")
 	c.assert.Equal(len(config.Queue.Topics), 0)
+}
+
+var redisAuthConfig = `
+redis:
+  host: localhost:9000
+  password: jsdf3-402341234
+`
+
+// It's ok for stuff to be missing, we'll check that elsewhere
+func (c *ConfigTestSuite) TestConfig_RedisPass() {
+	c.WriteTemp(redisAuthConfig)
+	config, err := ReadConfig(c.tempfile.Name())
+	c.assert.NoError(err)
+
+	c.assert.Equal(config.Redis.Password, "jsdf3-402341234")
+	c.assert.Equal(config.Redis.Host, "localhost:9000")
 }
