@@ -1,5 +1,3 @@
-// +build redisint
-
 package main
 
 import (

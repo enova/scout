@@ -1,5 +1,3 @@
-// +build sqsint
-
 package main
 
 import (
@@ -102,7 +100,7 @@ func TestSQS_FetchDelete(t *testing.T) {
 		}
 
 		for _, msg := range messages {
-			recd[msg.Body] += 1
+			recd[msg.Body]++
 			err := client.Delete(msg)
 			require.NoError(t, err)
 		}
