@@ -41,8 +41,8 @@ application. The structure looks like this.
 ```yaml
 redis:
   host: "localhost:9000"
-  namespace: "test"
   queue: "background"
+  namespace: "test" # optional key
   password: "someoptionalpassword"  # optional key
 aws:
   access_key: "super"

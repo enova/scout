@@ -28,11 +28,14 @@ func NewRedisWorkerClient(redis RedisConfig) (WorkerClient, error) {
 	}
 
 	workerConfig := map[string]string{
-		"server":    redis.Host,
-		"database":  "0",
-		"pool":      "20",
-		"process":   "1",
-		"namespace": redis.Namespace,
+		"server":   redis.Host,
+		"database": "0",
+		"pool":     "20",
+		"process":  "1",
+	}
+
+	if redis.Namespace != "" {
+		workerConfig["namespace"] = redis.Namespace
 	}
 
 	if redis.Password != "" {
