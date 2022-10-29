@@ -33,7 +33,11 @@ type sdkClient struct {
 // NewAWSSQSClient creates an SQS client that talks to AWS on the given queue
 func NewAWSSQSClient(conf AWSConfig, queueName string) (SQSClient, error) {
 	creds := credentials.NewStaticCredentials(conf.AccessKey, conf.SecretKey, "")
-	sess := session.New(&aws.Config{Region: formatRegion(conf.Region), Credentials: creds})
+	sess, err := session.NewSession(&aws.Config{Region: formatRegion(conf.Region), Credentials: creds})
+
+	if err != nil {
+		return nil, err
+	}
 
 	client := new(sdkClient)
 	client.service = sqs.New(sess)
