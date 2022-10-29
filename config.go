@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"os"
 
 	"gopkg.in/yaml.v2"
 )
@@ -42,7 +42,7 @@ type QueueConfig struct {
 // an error if the file was unable to be parsed. It does no error checking
 // as far as required fields.
 func ReadConfig(file string) (*Config, error) {
-	data, err := ioutil.ReadFile(file)
+	data, err := os.ReadFile(file)
 	if err != nil {
 		return nil, err
 	}
