@@ -18,9 +18,9 @@ type Config struct {
 // connect to a redis instance and enqueue workers.
 type RedisConfig struct {
 	Host      string `yaml:"host"`
-	Namespace string `yaml:"namespace"`
 	Queue     string `yaml:"queue"`
-	Password  string `yaml:"password"`
+	Namespace string `yaml:"namespace"` // optional
+	Password  string `yaml:"password"`  // optional
 }
 
 // AWSConfig is a nested config that contains the necessary parameters to
