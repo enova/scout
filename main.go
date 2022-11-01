@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -13,8 +14,9 @@ import (
 )
 
 var (
-	app     *cli.App
-	signals chan os.Signal
+	app         *cli.App
+	signals     chan os.Signal
+	sqsDefaults sqsSettings
 )
 
 func init() {
@@ -97,6 +99,23 @@ func runApp(ctx *cli.Context) error {
 	log.Info("Now listening on queue: ", config.Queue.Name)
 	for topic, worker := range config.Queue.Topics {
 		log.Infof("%s -> %s", topic, worker)
+	}
+
+	maxNumberOfMessages, _ := strconv.ParseInt(os.Getenv("SCOUT_SQS_MAX_NUMBER_OF_MESSAGES"), 10, 64)
+	if maxNumberOfMessages != 0 {
+		sqsDefaults.maxNumberOfMessages = &maxNumberOfMessages
+	} else {
+		*sqsDefaults.maxNumberOfMessages = 10
+	}
+
+	waitTimeSeconds, _ := strconv.ParseInt(os.Getenv("SCOUT_SQS_WAIT_TIME_SECONDS"), 10, 64)
+	if waitTimeSeconds != 0 {
+		sqsDefaults.waitTimeSeconds = &waitTimeSeconds
+	}
+
+	visibilityTimeout, _ := strconv.ParseInt(os.Getenv("SCOUT_SQS_VISIBILITY_TIMEOUT"), 10, 64)
+	if visibilityTimeout != 0 {
+		sqsDefaults.visibilityTimeout = &visibilityTimeout
 	}
 
 	Listen(queue, time.Tick(time.Duration(frequency)*time.Millisecond))

@@ -28,6 +28,13 @@ type Message struct {
 type sdkClient struct {
 	service *sqs.SQS
 	url     string
+	sqsSettings
+}
+
+type sqsSettings struct {
+	maxNumberOfMessages *int64
+	waitTimeSeconds     *int64
+	visibilityTimeout   *int64
 }
 
 // NewAWSSQSClient creates an SQS client that talks to AWS on the given queue
@@ -39,8 +46,10 @@ func NewAWSSQSClient(conf AWSConfig, queueName string) (SQSClient, error) {
 		return nil, err
 	}
 
-	client := new(sdkClient)
-	client.service = sqs.New(sess)
+	client := &sdkClient{
+		service:     sqs.New(sess),
+		sqsSettings: sqsDefaults,
+	}
 
 	resp, err := client.service.GetQueueUrl(&sqs.GetQueueUrlInput{
 		QueueName: &queueName,
@@ -57,7 +66,9 @@ func NewAWSSQSClient(conf AWSConfig, queueName string) (SQSClient, error) {
 func (s *sdkClient) Fetch() ([]Message, error) {
 	res, err := s.service.ReceiveMessage(&sqs.ReceiveMessageInput{
 		QueueUrl:            &s.url,
-		MaxNumberOfMessages: aws.Int64(10),
+		MaxNumberOfMessages: s.maxNumberOfMessages,
+		WaitTimeSeconds:     s.waitTimeSeconds,
+		VisibilityTimeout:   s.visibilityTimeout,
 	})
 	if err != nil {
 		return nil, err
