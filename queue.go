@@ -35,7 +35,7 @@ func NewQueue(config *Config) (Queue, error) {
 	queue := new(queue)
 	var err error
 
-	queue.SQSClient, err = NewAWSSQSClient(config.AWS, config.Queue.Name)
+	queue.SQSClient, err = NewAWSSQSClient(config.AWS, config.Queue.Name, config.SQS)
 	if err != nil {
 		return nil, err
 	}
