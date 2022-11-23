@@ -41,9 +41,9 @@ type QueueConfig struct {
 
 // SQSConfig is a nested config meant to be passed directly to the SQS client
 type SQSConfig struct {
-	maxNumberOfMessages int64
-	waitTimeSeconds     int64
-	visibilityTimeout   int64
+	maxNumberOfMessages int64 `yaml:"max_number_of_messages"`
+	waitTimeSeconds     int64 `yaml:"wait_time_seconds"`
+	visibilityTimeout   int64 `yaml:"visibility_timeout"`
 }
 
 // ReadConfig reads from a file with the given name and returns a config or
