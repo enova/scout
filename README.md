@@ -58,6 +58,14 @@ queue:
 None of this information is actually an example of anything other than the
 strucure of the file, so if you copy paste it you'll probably be disappointed.
 
+### Environment Variables
+
+A few optional settings can also be configured by environment variable:
+
+* `SCOUT_SQS_MAX_NUMBER_OF_MESSAGES` - Max number of SQS messages to fetch at once
+* `SCOUT_SQS_WAIT_TIME_SECONDS` - Max seconds to wait for an SQS message per poll
+* `SCOUT_SQS_VISIBILITY_TIMEOUT` - How long to hide an SQS message after receiving it
+
 ## Versioning
 
 Scout uses tagged commits that are compatible with go modules. The first module

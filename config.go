@@ -12,6 +12,7 @@ type Config struct {
 	Redis RedisConfig `yaml:"redis"`
 	AWS   AWSConfig   `yaml:"aws"`
 	Queue QueueConfig `yaml:"queue"`
+	SQS   SQSConfig
 }
 
 // RedisConfig is a nested config that contains the necessary parameters to
@@ -36,6 +37,13 @@ type AWSConfig struct {
 type QueueConfig struct {
 	Name   string            `yaml:"name"`
 	Topics map[string]string `yaml:"topics"`
+}
+
+// SQSConfig is a nested config meant to be passed directly to the SQS client
+type SQSConfig struct {
+	maxNumberOfMessages int64 `yaml:"max_number_of_messages"`
+	waitTimeSeconds     int64 `yaml:"wait_time_seconds"`
+	visibilityTimeout   int64 `yaml:"visibility_timeout"`
 }
 
 // ReadConfig reads from a file with the given name and returns a config or
