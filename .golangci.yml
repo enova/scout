@@ -1,0 +1,15 @@
+version: "2"
+
+formatters:
+  enable:
+    - "gofmt"
+
+linters:
+  default: "standard"
+  disable:
+    - "errcheck"
+  settings:
+    staticcheck:
+      # this is the default plus -ST1005
+      # see: https://staticcheck.dev/docs/configuration/options/#checks
+      checks: ["all", "-ST1000", "-ST1003", "-ST1005", "-ST1016", "-ST1020", "-ST1021", "-ST1022"]

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -23,7 +22,7 @@ func (c *ConfigTestSuite) SetupTest() {
 	c.assert = require.New(c.T())
 
 	var err error
-	c.tempfile, err = ioutil.TempFile("", "config")
+	c.tempfile, err = os.CreateTemp("", "config")
 	c.assert.NoError(err)
 }
 
