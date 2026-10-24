@@ -9,11 +9,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Queue is an encasulation for processing an SQS queue and enqueueing the
+// Queue is an encapsulation for processing an SQS queue and enqueueing the
 // results in sidekiq
 type Queue interface {
 	// Poll gets the next batch of messages from SQS and processes them.
-	// When it's finished, it downs the sempahore
+	// When it's finished, it downs the semaphore
 	Poll()
 
 	// Semaphore returns the lock used to ensure that all the work is

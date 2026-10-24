@@ -7,7 +7,7 @@ import (
 )
 
 // Config is the internal representation of the yaml that determines what
-// the app listens to an enqueues
+// the app listens to and enqueues
 type Config struct {
 	Redis RedisConfig `yaml:"redis"`
 	AWS   AWSConfig   `yaml:"aws"`
@@ -33,7 +33,7 @@ type AWSConfig struct {
 }
 
 // QueueConfig is a nested config that gives the SQS queue to listen on
-// and a mapping of topics to workeers
+// and a mapping of topics to workers
 type QueueConfig struct {
 	Name   string            `yaml:"name"`
 	Topics map[string]string `yaml:"topics"`
